@@ -1,0 +1,28 @@
+name: 每日定时任务
+
+on:
+  schedule:
+    - cron: "10 20 * * *" # 每天 UTC 20:10 运行,相当于北京时间 4:10
+
+jobs:
+  run_daily_task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v2
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: 安装依赖
+        run: npm install
+
+      - name: 运行定时脚本
+        env:
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+          FEISHU_TABLE_TOKEN: ${{ secrets.FEISHU_TABLE_TOKEN }}
+          FEISHU_TABLE_ID: ${{ secrets.FEISHU_TABLE_ID }}
+        run: node scripts/sync-meeting-data.js
