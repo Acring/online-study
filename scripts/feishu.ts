@@ -118,4 +118,76 @@ export default class Feishu {
     );
     return response;
   }
+
+  async requestMeetingExport(startTime: number, endTime: number) {
+    if (!this.tenant_access_token) {
+      await this.initAccessToken();
+    }
+
+    const response = await fetch(
+      `${BASE_URL}/open-apis/vc/v1/exports/meeting_list`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.tenant_access_token}`,
+        },
+        body: JSON.stringify({
+          start_time: startTime,
+          end_time: endTime,
+        }),
+      },
+    );
+  
+    const data: any = await response.json();
+    return data.data.task_id;
+  }
+
+  async waitForExportCompletion(taskId: string) {
+    if (!this.tenant_access_token) {
+      await this.initAccessToken();
+    }
+
+    while (true) {
+      const taskResponse = await fetch(
+        `${BASE_URL}/open-apis/vc/v1/exports/${taskId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${this.tenant_access_token}`,
+          },
+        },
+      );
+  
+      const taskData: any = await taskResponse.json();
+      if (taskData.data.status === 3) {
+        console.log("任务完成", taskData.data.url);
+        return taskData.data.file_token;
+      } else {
+        console.log("任务未完成");
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // 等待5秒后再次检查
+      }
+    }
+  }
+
+  async downloadFile(fileToken: string) {
+    if (!this.tenant_access_token) {
+      await this.initAccessToken();
+    }
+
+    const response = await fetch(
+      `${BASE_URL}/open-apis/vc/v1/exports/download?file_token=${fileToken}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.tenant_access_token}`,
+        },
+      },
+    );
+  
+    const buffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(buffer);
+    const fs = require('fs');
+    fs.writeFileSync("./meetingData.xlsx", uint8Array);
+    console.log("文件下载完成:", "./meetingData.xlsx");
+  }
 }

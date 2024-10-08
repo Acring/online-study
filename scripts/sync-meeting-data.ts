@@ -14,24 +14,7 @@ const appSecret = process.env.FEISHU_APP_SECRET;
 const tableToken = process.env.FEISHU_TABLE_TOKEN;
 const tableId = process.env.FEISHU_TABLE_ID;
 
-const getTenantAccessToken = async () => {
-  const response = await fetch(
-    "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        app_id: appId,
-        app_secret: appSecret,
-      }),
-    },
-  );
 
-  const data: any = await response.json();
-  return data.tenant_access_token;
-};
 
 const getTimeRange = () => {
   const startTime = Math.floor(
@@ -41,63 +24,11 @@ const getTimeRange = () => {
   return { startTime, endTime };
 };
 
-const requestMeetingExport = async (tenantAccessToken, startTime, endTime) => {
-  const response = await fetch(
-    "https://open.feishu.cn/open-apis/vc/v1/exports/meeting_list",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${tenantAccessToken}`,
-      },
-      body: JSON.stringify({
-        start_time: startTime,
-        end_time: endTime,
-      }),
-    },
-  );
 
-  const data: any = await response.json();
-  return data.data.task_id;
-};
 
-const waitForExportCompletion = async (tenantAccessToken, taskId) => {
-  while (true) {
-    const taskResponse = await fetch(
-      `https://open.feishu.cn/open-apis/vc/v1/exports/${taskId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${tenantAccessToken}`,
-        },
-      },
-    );
 
-    const taskData: any = await taskResponse.json();
-    if (taskData.data.status === 3) {
-      console.log("任务完成", taskData.data.url);
-      return taskData.data.file_token;
-    } else {
-      console.log("任务未完成");
-      await new Promise((resolve) => setTimeout(resolve, 5000)); // 等待5秒后再次检查
-    }
-  }
-};
 
-const downloadFile = async (fileToken, tenantAccessToken) => {
-  const response = await fetch(
-    `https://open.feishu.cn/open-apis/vc/v1/exports/download?file_token=${fileToken}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${tenantAccessToken}`,
-      },
-    },
-  );
 
-  const buffer = await response.buffer();
-  fs.writeFileSync("./meetingData.xlsx", buffer);
-  console.log("文件下载完成:", "./meetingData.xlsx");
-};
 
 const parseCSV = () => {
   const workbook = xlsx.readFile("./meetingData.xlsx", { type: "buffer" });
@@ -107,18 +38,15 @@ const parseCSV = () => {
   return data;
 };
 
-const uploadToFeishuTable = async (records) => {
-  const feishuAPI = new Feishu({
-    appId: tableToken,
-    appSecret: tableData,
-  });
+const uploadToFeishuTable = async (records: any[], feishuAPI: Feishu) => {
+
 
   // 这里添加上传到飞书多维表格的逻辑
   console.log("上传到飞书多维表格的数据:", records);
   const tableFields = records[0];
 
   const tableData = records.map((record) => {
-    return tableFields.reduce((acc, field, index) => {
+    return tableFields.reduce((acc: any, field: any, index: any) => {
       acc[field] = record[index];
       return acc;
     }, {});
@@ -138,27 +66,33 @@ const syncMeetingData = async () => {
     process.exit(1);
   }
 
+  if (!appId || !appSecret) {
+    console.log("请在环境变量配置APP_ID和APP_SECRET");
+    process.exit(1);
+  }
+  const feishuAPI = new Feishu({
+    appId: appId,
+    appSecret: appSecret,
+  });
+
   try {
-    const tenantAccessToken = await getTenantAccessToken();
+    const tenantAccessToken = await feishuAPI.initAccessToken();
     console.log("tenantAccessToken", tenantAccessToken);
 
     const { startTime, endTime } = getTimeRange();
-    console.log("startTime", startTime);
-    console.log("endTime", endTime);
 
-    const taskId = await requestMeetingExport(
-      tenantAccessToken,
+    const taskId = await feishuAPI.requestMeetingExport(
       startTime,
       endTime,
     );
-    const fileToken = await waitForExportCompletion(tenantAccessToken, taskId);
+    const fileToken = await feishuAPI.waitForExportCompletion(taskId);
 
-    await downloadFile(fileToken, tenantAccessToken);
+    await feishuAPI.downloadFile(fileToken);
 
     const records = parseCSV();
     console.log("解析后的记录数:", records.length);
 
-    await uploadToFeishuTable(records);
+    await uploadToFeishuTable(records, feishuAPI);
   } catch (error) {
     console.error("同步会议数据时出错:", error);
   }
