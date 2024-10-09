@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM"],
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,8 +12,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "outDir": "./dist",
-    "rootDir": "./scripts"
+    "rootDir": "."
   },
-  "include": ["scripts/**/*"],
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["./**/*", "sync-meeting-data.ts", "feishu.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import fs from "fs";
 
 // 请求地址和接口
 const BASE_URL = "https://open.feishu.cn";
@@ -37,13 +38,14 @@ export default class Feishu {
     const result: any = await response.json();
     const { tenant_access_token } = result;
     this.tenant_access_token = tenant_access_token;
+    return tenant_access_token;
   }
 
   async getBitableData({
-    appToken,
+    tableToken,
     tableId,
   }: {
-    appToken: string;
+    tableToken: string;
     tableId: string;
   }) {
     if (!this.tenant_access_token) {
@@ -51,16 +53,18 @@ export default class Feishu {
     }
 
     const response = await fetch(
-      `${BASE_URL}/open-apis/bitable/v1/apps/${appToken}/tables/${tableId}/records/`,
+      `${BASE_URL}/open-apis/bitable/v1/apps/${tableToken}/tables/${tableId}/records/search`,
       {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.tenant_access_token}`,
         },
+        body: JSON.stringify({})
       },
     );
     const result: any = await response.json();
+    console.log("result", result);
     return result.data.items ?? [];
   }
 
@@ -102,7 +106,6 @@ export default class Feishu {
     if (!this.tenant_access_token) {
       await this.initAccessToken();
     }
-
     const response = await fetch(
       `${BASE_URL}/open-apis/bitable/v1/apps/${appToken}/tables/${tableId}/records/`,
       {
@@ -112,7 +115,7 @@ export default class Feishu {
           Authorization: `Bearer ${this.tenant_access_token}`,
         },
         body: JSON.stringify({
-          fields,
+          fields: fields,
         }),
       },
     );
@@ -142,6 +145,45 @@ export default class Feishu {
     return data.data.task_id;
   }
 
+  // 从 https://open.feishu.cn/open-apis/vc/v1/exports/participant_list 触发参会人任务
+  async getParticipantList({
+    startTime,
+    endTime,
+    meetingNo,
+  }: {
+    startTime: number;
+    endTime: number;
+    meetingNo: string;
+  }) {
+    console.log("startTime", startTime);
+    console.log("endTime", endTime);
+    console.log("meetingNo", meetingNo);
+    if (!this.tenant_access_token) {
+      await this.initAccessToken();
+    }
+
+    const response = await fetch(
+      `${BASE_URL}/open-apis/vc/v1/exports/participant_list`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.tenant_access_token}`,
+        },
+        body: JSON.stringify({
+          meeting_start_time: startTime,
+          meeting_end_time: endTime,
+          meeting_no: meetingNo,
+        }),
+      },
+    );
+
+    const data: any = await response.json();
+    console.log("data", data);
+    return data.data.task_id ?? "";
+  }
+
+
+
   async waitForExportCompletion(taskId: string) {
     if (!this.tenant_access_token) {
       await this.initAccessToken();
@@ -163,13 +205,13 @@ export default class Feishu {
         console.log("任务完成", taskData.data.url);
         return taskData.data.file_token;
       } else {
-        console.log("任务未完成");
+        console.log("任务进行中");
         await new Promise((resolve) => setTimeout(resolve, 5000)); // 等待5秒后再次检查
       }
     }
   }
 
-  async downloadFile(fileToken: string) {
+  async downloadFile(fileToken: string, fileName: string) {
     if (!this.tenant_access_token) {
       await this.initAccessToken();
     }
@@ -186,8 +228,7 @@ export default class Feishu {
   
     const buffer = await response.arrayBuffer();
     const uint8Array = new Uint8Array(buffer);
-    const fs = require('fs');
-    fs.writeFileSync("./meetingData.xlsx", uint8Array);
-    console.log("文件下载完成:", "./meetingData.xlsx");
+    fs.writeFileSync(`./${fileName}.xlsx`, uint8Array);
+    console.log("文件下载完成:", `./${fileName}.xlsx`);
   }
 }
