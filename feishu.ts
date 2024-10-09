@@ -53,18 +53,18 @@ export default class Feishu {
     }
 
     const response = await fetch(
-      `${BASE_URL}/open-apis/bitable/v1/apps/${tableToken}/tables/${tableId}/records/search`,
+      `${BASE_URL}/open-apis/bitable/v1/apps/${tableToken}/tables/${tableId}/records/search?page_size=500`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.tenant_access_token}`,
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({}),
       },
     );
     const result: any = await response.json();
-    console.log("result", result);
+
     return result.data.items ?? [];
   }
 
@@ -140,7 +140,7 @@ export default class Feishu {
         }),
       },
     );
-  
+
     const data: any = await response.json();
     return data.data.task_id;
   }
@@ -182,8 +182,6 @@ export default class Feishu {
     return data.data.task_id ?? "";
   }
 
-
-
   async waitForExportCompletion(taskId: string) {
     if (!this.tenant_access_token) {
       await this.initAccessToken();
@@ -199,8 +197,9 @@ export default class Feishu {
           },
         },
       );
-  
+
       const taskData: any = await taskResponse.json();
+      console.log("taskData", taskData);
       if (taskData.data.status === 3) {
         console.log("任务完成", taskData.data.url);
         return taskData.data.file_token;
@@ -225,7 +224,7 @@ export default class Feishu {
         },
       },
     );
-  
+
     const buffer = await response.arrayBuffer();
     const uint8Array = new Uint8Array(buffer);
     fs.writeFileSync(`./${fileName}.xlsx`, uint8Array);
