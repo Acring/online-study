@@ -47,7 +47,7 @@ interface BitableRecord {
 
 const getTimeRange = () => {
   const startTime = Math.floor(
-    dayjs().subtract(10, "day").startOf("day").valueOf() / 1000,
+    dayjs().subtract(1, "day").startOf("day").valueOf() / 1000,
   );
   const endTime = Math.floor(dayjs().endOf("day").valueOf() / 1000);
   return { startTime, endTime };
