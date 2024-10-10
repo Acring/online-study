@@ -5,7 +5,7 @@ on:
     - cron: "10 20 * * *" # 每天 UTC 20:10 运行,相当于北京时间 4:10
   push:
     branches:
-      - main # 假设主分支是 main，如果是其他分支名请相应修改
+      - master # 假设主分支是 main，如果是其他分支名请相应修改
 
 jobs:
   run_daily_task:
