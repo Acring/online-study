@@ -10,6 +10,8 @@
  * 替换重复的参会人数据
  * 将参会时常转换为分钟,方便统计
  */
+
+import fs from "fs";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
 import xlsx from "xlsx";
@@ -58,7 +60,12 @@ const parseXLSX = (fileName: string) => {
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
   const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+  removeXLSX(fileName);
   return data;
+};
+
+const removeXLSX = (fileName: string) => {
+  fs.unlinkSync(`./${fileName}.xlsx`);
 };
 
 const uploadMeetingData = async (records: any[], feishuAPI: Feishu) => {
@@ -129,7 +136,9 @@ const uploadMeetingData = async (records: any[], feishuAPI: Feishu) => {
       }
       if (
         meetingStatisticBitableData.find(
-          (item: any) => item.fields["自习日期"] === record["会议日期"],
+          (item: any) =>
+            dayjs(item.fields["自习日期"]).format("YYYY-MM-DD") ===
+            dayjs(record["会议日期"]).format("YYYY-MM-DD"),
         )
       ) {
         console.log("会议日期已存在", record["会议日期"]);
