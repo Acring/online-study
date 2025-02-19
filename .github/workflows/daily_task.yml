@@ -1,0 +1,44 @@
+name: 每日定时任务和推送触发
+
+on:
+  schedule:
+    - cron: "15 20 * * *" # 每天 UTC 20:15 运行,相当于北京时间 4:15
+  push:
+    branches:
+      - master # 假设主分支是 main，如果是其他分支名请相应修改
+
+jobs:
+  run_daily_task:
+    runs-on: ubuntu-latest
+    env:
+      TZ: "Asia/Shanghai"
+    steps:
+      - name: 设置 Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+
+      - name: 安装 pnpm
+        run: |
+          npm install -g pnpm
+
+      - name: 检出代码
+        uses: actions/checkout@v2
+
+      - name: 安装依赖
+        run: |
+          pnpm install
+
+      - name: 运行定时脚本
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+          TABLE_TOKEN: ${{ secrets.TABLE_TOKEN }}
+          TABLE_ID: ${{ secrets.TABLE_ID }}
+          PARTICIPANT_TABLE_TOKEN: ${{ secrets.PARTICIPANT_TABLE_TOKEN }}
+          PARTICIPANT_TABLE_ID: ${{ secrets.PARTICIPANT_TABLE_ID }}
+          MEETING_STATISTIC_TABLE_TOKEN: ${{ secrets.MEETING_STATISTIC_TABLE_TOKEN }}
+          MEETING_STATISTIC_TABLE_ID: ${{ secrets.MEETING_STATISTIC_TABLE_ID }}
+          PARTICIPANT_STATISTIC_TABLE_TOKEN: ${{ secrets.PARTICIPANT_STATISTIC_TABLE_TOKEN }}
+          PARTICIPANT_STATISTIC_TABLE_ID: ${{ secrets.PARTICIPANT_STATISTIC_TABLE_ID }}
+        run: yarn sync-meeting-data

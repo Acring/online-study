@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 在线学习数据统计系统
 
-## Getting Started
+这是一个基于 Next.js 开发的在线学习数据统计系统，用于实时监控和统计飞书会议的学习情况。
 
-First, run the development server:
+## 功能特点
+
+- 实时显示当前在线学习人数
+- 统计每个参与者的学习时长
+- 自动同步飞书会议数据到多维表格
+- 支持每日定时数据同步
+- 美观的粒子动画背景
+
+## 技术栈
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- 飞书开放平台 API
+
+## 开始使用
+
+### 环境要求
+
+- Node.js 20+
+- pnpm
+
+### 安装依赖
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 配置环境变量
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+创建 `.env` 文件并配置以下变量：
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+APP_ID=你的飞书应用ID
+APP_SECRET=你的飞书应用密钥
+TABLE_TOKEN=会议数据表Token
+TABLE_ID=会议数据表ID
+PARTICIPANT_TABLE_TOKEN=参会人数据表Token
+PARTICIPANT_TABLE_ID=参会人数据表ID
+MEETING_STATISTIC_TABLE_TOKEN=会议统计表Token
+MEETING_STATISTIC_TABLE_ID=会议统计表ID
+PARTICIPANT_STATISTIC_TABLE_TOKEN=参会人统计表Token
+PARTICIPANT_STATISTIC_TABLE_ID=参会人统计表ID
+```
 
-## Learn More
+### 开发运行
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+访问 http://localhost:3000 查看结果。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 构建部署
 
-## Deploy on Vercel
+```bash
+pnpm build
+pnpm start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 自动化任务
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+系统包含两个主要的自动化脚本：
+
+1. 同步会议数据：
+```bash
+pnpm sync-meeting-data
+```
+
+2. 获取学习状态：
+```bash
+pnpm get-study-status
+```
+
+## GitHub Actions
+
+项目配置了自动化的 GitHub Actions 工作流，每天会自动执行数据同步任务。工作流配置详见：
+
+.github/workflows/daily_task.yml
+
+## 项目结构
+
+```
+src/
+├── app/                # Next.js 应用页面
+├── components/         # React 组件
+├── lib/               # 工具函数和配置
+├── scripts/           # 自动化脚本
+├── types/             # TypeScript 类型定义
+└── ...
+```
+
+## 贡献指南
+
+1. Fork 本项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 提交 Pull Request
+
+## 许可证
+
+MIT
+
+## 联系方式
+
+如有问题或建议，请提交 Issue 或 Pull Request。
