@@ -22,21 +22,30 @@ export async function GET() {
 
   // 初始化飞书 API 客户端
   const feishuAPI = new Feishu(config.feishu);
-  // 获取访问令牌
-  await feishuAPI.initAccessToken();
   const meetingList = await feishuAPI.getMeetingList({
     startTime,
     endTime,
-    meetingStatus: '1',
+    meetingStatus: 1,
   });
 
+  if (!meetingList) {
+    return NextResponse.json({
+      error: '获取会议列表失败',
+    });
+  }
+
   const meetingNo = meetingList[0].meeting_id;
+  if (!meetingNo) {
+    return NextResponse.json({
+      error: '获取会议号失败',
+    });
+  }
   // 获取参会者列表
   const participantList = await feishuAPI.getParticipantList({
     startTime: dayjs.utc(meetingList[0].meeting_start_time).tz(tz).unix(), // 会议开始时间
     endTime: dayjs().tz(tz).unix(), // 当前时间
     meetingNo,
-    meetingStatus: '1',
+    meetingStatus: 1,
   });
   if (!participantList) {
     return NextResponse.json({

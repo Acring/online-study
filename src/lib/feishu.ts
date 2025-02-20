@@ -1,10 +1,4 @@
-import fs from 'fs';
-
-import { MeetingListResponse } from '../types/meeting';
-import { ParticipantResponse } from '../types/participant';
-
-// 请求地址和接口
-const BASE_URL = 'https://open.feishu.cn';
+import * as lark from '@larksuiteoapi/node-sdk';
 
 /**
  * 获取飞书应用鉴权token
@@ -12,32 +6,13 @@ const BASE_URL = 'https://open.feishu.cn';
  */
 
 export default class Feishu {
-  private appId: string;
-  private appSecret: string;
-  private tenant_access_token: string;
+  private client: lark.Client;
 
   constructor({ appId, appSecret }: { appId: string; appSecret: string }) {
-    this.appId = appId;
-    this.appSecret = appSecret;
-    this.tenant_access_token = '';
-  }
-
-  async initAccessToken() {
-    const response = await fetch(`${BASE_URL}/open-apis/auth/v3/tenant_access_token/internal/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        app_id: this.appId,
-        app_secret: this.appSecret,
-      }),
+    this.client = new lark.Client({
+      appId,
+      appSecret,
     });
-
-    const result: any = await response.json();
-    const { tenant_access_token } = result;
-    this.tenant_access_token = tenant_access_token;
-    return tenant_access_token;
   }
 
   async getBitableData({
@@ -49,27 +24,20 @@ export default class Feishu {
     tableId: string;
     body?: any;
   }) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-
-    const response = await fetch(
-      `${BASE_URL}/open-apis/bitable/v1/apps/${tableToken}/tables/${tableId}/records/search?page_size=500`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.tenant_access_token}`,
-        },
-        body: JSON.stringify(body),
-      }
-    );
-    const result: any = await response.json();
-
     try {
-      return result.data.items ?? [];
+      const response = await this.client.bitable.appTableRecord.search({
+        path: {
+          app_token: tableToken,
+          table_id: tableId,
+        },
+        params: {
+          page_size: 500,
+        },
+        data: body,
+      });
+      return response.data?.items ?? [];
     } catch (error) {
-      console.log('获取数据失败', error, result);
+      console.log('获取数据失败', error);
       process.exit(1);
     }
   }
@@ -83,21 +51,13 @@ export default class Feishu {
     tableId: string;
     recordId: string;
   }) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-
-    const response = await fetch(
-      `${BASE_URL}/open-apis/bitable/v1/apps/${appToken}/tables/${tableId}/records/${recordId}/`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.tenant_access_token}`,
-        },
-      }
-    );
-    return response;
+    return await this.client.bitable.appTableRecord.delete({
+      path: {
+        app_token: appToken,
+        table_id: tableId,
+        record_id: recordId,
+      },
+    });
   }
 
   async addBitableRecord({
@@ -109,46 +69,27 @@ export default class Feishu {
     tableId: string;
     fields: any;
   }) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-    const response = await fetch(
-      `${BASE_URL}/open-apis/bitable/v1/apps/${appToken}/tables/${tableId}/records/`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.tenant_access_token}`,
-        },
-        body: JSON.stringify({
-          fields: fields,
-        }),
-      }
-    );
-    return response;
+    return await this.client.bitable.appTableRecord.create({
+      path: {
+        app_token: appToken,
+        table_id: tableId,
+      },
+      data: {
+        fields,
+      },
+    });
   }
 
   async requestMeetingExport(startTime: number, endTime: number) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-
-    const response = await fetch(`${BASE_URL}/open-apis/vc/v1/exports/meeting_list`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.tenant_access_token}`,
+    const response = await this.client.vc.export.meetingList({
+      data: {
+        start_time: startTime.toString(),
+        end_time: endTime.toString(),
       },
-      body: JSON.stringify({
-        start_time: startTime,
-        end_time: endTime,
-      }),
     });
-
-    const data: any = await response.json();
-    return data.data.task_id;
+    return response.data?.task_id;
   }
 
-  // 从 https://open.feishu.cn/open-apis/vc/v1/exports/participant_list 触发参会人任务
   async requestParticipantExport({
     startTime,
     endTime,
@@ -158,107 +99,68 @@ export default class Feishu {
     endTime: number;
     meetingNo: string;
   }) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-
-    const response = await fetch(`${BASE_URL}/open-apis/vc/v1/exports/participant_list`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.tenant_access_token}`,
-      },
-      body: JSON.stringify({
-        meeting_start_time: startTime,
-        meeting_end_time: endTime,
+    const response = await this.client.vc.export.participantList({
+      data: {
+        meeting_start_time: startTime.toString(),
+        meeting_end_time: endTime.toString(),
         meeting_no: meetingNo,
-      }),
+      },
     });
-
-    const data: any = await response.json();
-    console.log('data', data);
-    return data.data.task_id ?? '';
+    console.log('data', response);
+    return response.data?.task_id ?? '';
   }
 
   async waitForExportCompletion(taskId: string) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-
     while (true) {
-      const taskResponse = await fetch(`${BASE_URL}/open-apis/vc/v1/exports/${taskId}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.tenant_access_token}`,
+      const response = await this.client.vc.export.get({
+        path: {
+          task_id: taskId,
         },
       });
 
-      const taskData: any = await taskResponse.json();
-      if (taskData.data.status === 3) {
-        console.log('任务完成', taskData.data.url);
-        return taskData.data.file_token;
+      if (response.data?.status === 3) {
+        console.log('任务完成', response.data.url);
+        return response.data.file_token;
       } else {
         console.log('任务进行中');
-        await new Promise((resolve) => setTimeout(resolve, 5000)); // 等待5秒后再次检查
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
     }
   }
 
   async downloadFile(fileToken: string, fileName: string) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
+    const response = await this.client.vc.export.download({
+      params: {
+        file_token: fileToken,
+      },
+    });
 
-    const response = await fetch(
-      `${BASE_URL}/open-apis/vc/v1/exports/download?file_token=${fileToken}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.tenant_access_token}`,
-        },
-      }
-    );
-
-    const buffer = await response.arrayBuffer();
-    const uint8Array = new Uint8Array(buffer);
-    fs.writeFileSync(`./${fileName}.xlsx`, uint8Array);
+    await response.writeFile(`./${fileName}.xlsx`);
     console.log('文件下载完成:', `./${fileName}.xlsx`);
   }
 
   async getMeetingList({
     startTime,
     endTime,
-    meetingStatus = '1',
+    meetingStatus = 1,
   }: {
     startTime: number;
     endTime: number;
-    meetingStatus?: string;
+    meetingStatus?: number;
   }) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-
-    const response = await fetch(
-      `${BASE_URL}/open-apis/vc/v1/meeting_list?${new URLSearchParams({
-        start_time: startTime.toString(),
-        end_time: endTime.toString(),
-        meeting_status: meetingStatus,
-        page_size: '100',
-        page_token: '',
-      })}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.tenant_access_token}`,
-          'Content-Type': 'application/json',
+    try {
+      const response = await this.client.vc.meetingList.get({
+        params: {
+          start_time: startTime.toString(),
+          end_time: endTime.toString(),
+          meeting_status: meetingStatus,
+          page_size: 100,
+          page_token: '',
         },
-      }
-    );
-
-    const data = (await response.json()) as MeetingListResponse;
-    if (data.code === 0) {
-      return data.data.meeting_list;
-    } else {
-      console.log('获取会议列表失败', data);
+      });
+      return response.data?.meeting_list;
+    } catch (error) {
+      console.log('获取会议列表失败', error);
       process.exit(1);
     }
   }
@@ -267,39 +169,26 @@ export default class Feishu {
     startTime,
     endTime,
     meetingNo,
-    meetingStatus = '1',
+    meetingStatus = 1,
   }: {
     startTime: number;
     endTime: number;
     meetingNo: string;
-    meetingStatus?: string;
+    meetingStatus?: number;
   }) {
-    if (!this.tenant_access_token) {
-      await this.initAccessToken();
-    }
-
-    const response = await fetch(
-      `${BASE_URL}/open-apis/vc/v1/participant_list?${new URLSearchParams({
-        meeting_start_time: startTime.toString(),
-        meeting_end_time: endTime.toString(),
-        meeting_no: meetingNo,
-        meeting_status: meetingStatus,
-      })}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.tenant_access_token}`,
-          'Content-Type': 'application/json',
+    try {
+      const response = await this.client.vc.participantList.get({
+        params: {
+          meeting_start_time: startTime.toString(),
+          meeting_end_time: endTime.toString(),
+          meeting_no: meetingNo,
+          meeting_status: meetingStatus,
         },
-      }
-    );
-
-    const data = (await response.json()) as ParticipantResponse;
-    console.log('data', data, startTime, endTime, meetingNo);
-    if (data.code === 0) {
-      return data.data.participants;
-    } else {
-      console.log('获取参会人列表失败', data, startTime, endTime, meetingNo);
+      });
+      console.log('data', response, startTime, endTime, meetingNo);
+      return response.data?.participants;
+    } catch (error) {
+      console.log('获取参会人列表失败', error, startTime, endTime, meetingNo);
       return undefined;
     }
   }

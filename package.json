@@ -13,6 +13,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.42.0",
     "@types/dotenv": "^6.1.1",
     "async": "^3.2.6",
     "class-variance-authority": "^0.7.1",

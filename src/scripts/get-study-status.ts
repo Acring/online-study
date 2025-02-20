@@ -13,8 +13,6 @@ async function getStudyStatus() {
 
   // 初始化飞书 API 客户端
   const feishuAPI = new Feishu(config.feishu);
-  // 获取访问令牌
-  await feishuAPI.initAccessToken();
 
   // 计算查询时间范围
   // 开始时间设置为昨天凌晨
@@ -27,17 +25,23 @@ async function getStudyStatus() {
   const meetingList = await feishuAPI.getMeetingList({
     startTime,
     endTime,
-    meetingStatus: '1',
   });
 
+  if (!meetingList) {
+    console.log('获取会议列表失败');
+    process.exit(1);
+  }
   // 获取第一个会议的会议号
   const meetingNo = meetingList[0].meeting_id;
+  if (!meetingNo) {
+    console.log('获取会议号失败');
+    process.exit(1);
+  }
   // 获取参会者列表
   const participantList = await feishuAPI.getParticipantList({
     startTime: dayjs(meetingList[0].meeting_start_time).unix(), // 会议开始时间
     endTime: dayjs().unix(), // 当前时间
     meetingNo,
-    meetingStatus: '1',
   });
   if (!participantList) {
     console.log('获取参会者列表失败');

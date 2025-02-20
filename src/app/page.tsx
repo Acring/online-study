@@ -52,12 +52,17 @@ export default function Home() {
       <TransparentHole holeWidth="80%" holeHeight="75%" cornerRadius={16} />
       {meetingData && (
         <div className="absolute top-0 z-20 flex h-[12.5vh] w-full items-center justify-between px-[10%]">
-          <p className="text-4xl font-medium tracking-widest">
-            当前在线人数: {meetingData.currentParticipants}
-          </p>
-          <p className="text-4xl font-medium tracking-widest">
-            总参与人数: {meetingData.totalParticipants}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p className="text-4xl font-medium tracking-widest">
+              当前在线: {meetingData.currentParticipants}
+            </p>
+            <p className="text-2xl font-medium tracking-widest">
+              今日参与: {meetingData.totalParticipants}
+            </p>
+          </div>
+          <div className="text-3xl font-medium tracking-tighter">
+            如何加入: 关注主播后台自动私信加入方法（免费）
+          </div>
         </div>
       )}
     </div>
