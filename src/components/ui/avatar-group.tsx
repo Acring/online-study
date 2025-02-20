@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { cn } from '@/lib/utils';
 import { MeetingResponse } from '@/types/api/meeting';
 
 interface AvatarGroupProps {
@@ -49,8 +50,8 @@ export function AvatarGroup({ users }: AvatarGroupProps) {
             }`}
             style={isOnline ? { background: userGradients[user.name] } : undefined}
           >
-            <div className={`font-medium ${isOnline ? 'text-white' : 'text-gray-600'}`}>
-              {user.name}
+            <div className={cn('text-xl font-medium', isOnline ? 'text-white' : 'text-gray-600')}>
+              {user.name.slice(0, 7)}
             </div>
           </div>
         );

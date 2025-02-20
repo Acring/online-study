@@ -70,7 +70,7 @@ export default function Home() {
               关注主播后台自动私信加入方法（免费）
             </div>
           </div>
-          <div className="absolute bottom-[7.5%] left-[5%]">
+          <div className="absolute left-[5%] top-[88vh] w-[90%]">
             <AvatarGroup users={meetingData.participantDurations} />
           </div>
         </>
