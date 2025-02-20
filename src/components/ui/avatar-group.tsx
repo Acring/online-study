@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { MeetingResponse } from '@/types/api/meeting';
 
 interface AvatarGroupProps {
@@ -10,6 +12,18 @@ function generateGradient(): string {
 }
 
 export function AvatarGroup({ users }: AvatarGroupProps) {
+  // 为每个用户缓存颜色
+  const userGradients = useMemo(() => {
+    if (!users || users.length === 0) return {};
+    return users.reduce(
+      (acc, user) => {
+        acc[user.name] = generateGradient();
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+  }, [users?.map((u) => u?.name).join(',')]); // 只在用户列表变化时重新生成
+
   if (!users || users.length === 0) {
     return null;
   }
@@ -33,7 +47,7 @@ export function AvatarGroup({ users }: AvatarGroupProps) {
             className={`relative flex h-10 w-auto items-center justify-center rounded-full px-2 ring-2 ring-white ${
               isOnline ? '' : 'bg-gray-300'
             }`}
-            style={isOnline ? { background: generateGradient() } : undefined}
+            style={isOnline ? { background: userGradients[user.name] } : undefined}
           >
             <div className={`font-medium ${isOnline ? 'text-white' : 'text-gray-600'}`}>
               {user.name}
