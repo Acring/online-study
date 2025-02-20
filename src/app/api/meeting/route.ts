@@ -34,7 +34,7 @@ export async function GET() {
   // 获取参会者列表
   const participantList = await feishuAPI.getParticipantList({
     startTime: dayjs(meetingList[0].meeting_start_time).unix(), // 会议开始时间
-    endTime: dayjs().unix(), // 当前时间
+    endTime: dayjs().tz(tz).unix(), // 当前时间
     meetingNo,
     meetingStatus: '1',
   });
