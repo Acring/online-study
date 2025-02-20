@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { AvatarGroup } from '@/components/ui/avatar-group';
 import { Clock } from '@/components/ui/clock';
 import { Particles } from '@/components/ui/particles';
 import { TransparentHole } from '@/components/ui/transparent-hole';
@@ -17,6 +18,7 @@ export default function Home() {
         const response = await fetch('/api/meeting');
         const data: MeetingResponse = await response.json();
         setMeetingData(data);
+        console.log('meetingData', data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -49,24 +51,29 @@ export default function Home() {
         color={'#000000'}
         refresh
       />
-      <TransparentHole holeWidth="80%" holeHeight="75%" cornerRadius={16} />
+      <TransparentHole holeWidth="90%" holeHeight="75%" cornerRadius={16} />
       {meetingData && (
-        <div className="absolute top-0 z-20 flex h-[12.5vh] w-full items-center justify-between px-[10%]">
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <Clock />
+        <>
+          <div className="absolute top-0 z-20 flex h-[12.5vh] w-full items-center justify-between px-[5%]">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <Clock />
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-4xl font-medium tracking-widest">
+                当前在线: {meetingData.currentParticipants}
+              </p>
+              <p className="text-2xl font-medium tracking-widest text-gray-600">
+                今日参与: {meetingData.totalParticipants}
+              </p>
+            </div>
+            <div className="text-3xl font-medium tracking-tighter">
+              关注主播后台自动私信加入方法（免费）
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-4xl font-medium tracking-widest">
-              当前在线: {meetingData.currentParticipants}
-            </p>
-            <p className="text-2xl font-medium tracking-widest text-gray-600">
-              今日参与: {meetingData.totalParticipants}
-            </p>
+          <div className="absolute bottom-[7.5%] left-[5%]">
+            <AvatarGroup users={meetingData.participantDurations} />
           </div>
-          <div className="text-3xl font-medium tracking-tighter">
-            关注主播后台自动私信加入方法（免费）
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
