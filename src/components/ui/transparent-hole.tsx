@@ -41,6 +41,23 @@ export const TransparentHole = ({
       // 清除画布
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // 创建斜向渐变
+      const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        canvas.width,
+        canvas.height * 1.5 // 调整角度，使渐变更加倾斜
+      );
+
+      // 使用更明显的颜色对比
+      gradient.addColorStop(0, 'rgba(220, 225, 235, 0.95)'); // 较深的蓝灰色
+      gradient.addColorStop(0.5, 'rgba(235, 238, 245, 0.95)'); // 中间过渡色
+      gradient.addColorStop(1, 'rgba(250, 252, 255, 0.95)'); // 更亮的白色
+
+      // 使用渐变填充背景
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       // 计算实际的宽高值
       const calculateDimension = (value: number | string, totalSize: number) => {
         if (typeof value === 'string' && value.endsWith('%')) {
@@ -55,11 +72,6 @@ export const TransparentHole = ({
       // 计算镂空区域的位置（居中）
       const x = (canvas.width - actualWidth) / 2;
       const y = (canvas.height - actualHeight) / 2;
-
-      // 创建镂空效果
-      ctx.fillStyle = 'rgba(255, 255, 255)';
-      ctx.beginPath();
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // 绘制圆角矩形镂空
       ctx.beginPath();
