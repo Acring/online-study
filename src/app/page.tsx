@@ -1,8 +1,11 @@
 'use client';
 
-import { Particles } from "@/components/ui/particles";
-import { useEffect, useState } from "react";
-import { MeetingResponse } from "@/types/api/meeting";
+import { useEffect, useState } from 'react';
+
+import { Particles } from '@/components/ui/particles';
+import { TransparentHole } from '@/components/ui/transparent-hole';
+import { cn } from '@/lib/utils';
+import { MeetingResponse } from '@/types/api/meeting';
 
 export default function Home() {
   const [meetingData, setMeetingData] = useState<MeetingResponse | null>(null);
@@ -29,32 +32,28 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl">
+    <div
+      className={cn(
+        'relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border md:shadow-xl',
+        {
+          'bg-transparent': process.env.NODE_ENV === 'production',
+          'bg-black': process.env.NODE_ENV !== 'production',
+        }
+      )}
+    >
       <Particles
-        className="absolute inset-0"
-        quantity={100}
+        className="absolute inset-0 z-10"
+        quantity={200}
         ease={80}
-        color={"#000000"}
+        size={0.5}
+        color={'#000000'}
         refresh
       />
+      <TransparentHole holeWidth="80%" holeHeight="75%" cornerRadius={16} />
       {meetingData && (
-        <div className="z-10 p-6 space-y-4 bg-white/80 rounded-lg">
-          <h1 className="text-2xl font-bold">{meetingData.meetingInfo.meeting_topic}</h1>
-          <div className="space-y-2">
-            <p className="text-lg">当前在线人数: {meetingData.currentParticipants}</p>
-            <p className="text-lg">总参与人数: {meetingData.totalParticipants}</p>
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">参会者学习时长:</h2>
-            <div className="space-y-1">
-              {meetingData.participantDurations.map((participant) => (
-                <div key={participant.name} className="flex justify-between">
-                  <span>{participant.name}</span>
-                  <span>{participant.duration} 分钟</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="absolute top-0 z-20 flex h-[12.5vh] w-full items-center justify-between px-[10%]">
+          <p className="text-3xl">当前在线人数: {meetingData.currentParticipants}</p>
+          <p className="text-3xl">总参与人数: {meetingData.totalParticipants}</p>
         </div>
       )}
     </div>
