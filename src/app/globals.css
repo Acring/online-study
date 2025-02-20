@@ -1,4 +1,11 @@
 @font-face {
+  font-family: 'HeTangYueSe';
+  src: url('/fonts/荷塘月色手写体+Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
   font-family: 'ZiKuXingQiu';
   src: url('/fonts/字库星球飞扬体.ttf') format('truetype');
   font-weight: normal;
@@ -16,7 +23,7 @@ body,
 }
 
 body {
-  font-family: 'ZiKuXingQiu', Arial, Helvetica, sans-serif;
+  font-family: 'HeTangYueSe', 'ZiKuXingQiu', Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {

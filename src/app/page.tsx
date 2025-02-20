@@ -52,10 +52,12 @@ export default function Home() {
       <TransparentHole holeWidth="80%" holeHeight="75%" cornerRadius={16} />
       {meetingData && (
         <div className="absolute top-0 z-20 flex h-[12.5vh] w-full items-center justify-between px-[10%]">
-          <p className="text-3xl tracking-widest">
+          <p className="text-4xl font-medium tracking-widest">
             当前在线人数: {meetingData.currentParticipants}
           </p>
-          <p className="text-3xl tracking-widest">总参与人数: {meetingData.totalParticipants}</p>
+          <p className="text-4xl font-medium tracking-widest">
+            总参与人数: {meetingData.totalParticipants}
+          </p>
         </div>
       )}
     </div>

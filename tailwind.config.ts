@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        custom: ['ZiKuXingQiu', 'Arial', 'sans-serif'],
+        custom: ['HeTangYueSe', 'ZiKuXingQiu', 'Arial', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
