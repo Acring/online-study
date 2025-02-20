@@ -45,9 +45,9 @@ export const TransparentHole = ({
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height * 1.5);
 
       // 使用接近白色的渐变
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-      gradient.addColorStop(0.5, 'rgba(252, 252, 252, 0.95)');
-      gradient.addColorStop(1, 'rgba(250, 250, 250, 0.95)');
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      gradient.addColorStop(0.5, 'rgba(252, 252, 252, 1)');
+      gradient.addColorStop(1, 'rgba(250, 250, 250, 1)');
 
       // 使用渐变填充背景
       ctx.fillStyle = gradient;
