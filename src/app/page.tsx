@@ -44,7 +44,6 @@ export default function Home() {
       <Particles
         className="absolute inset-0 z-10"
         quantity={200}
-        ease={80}
         size={0.5}
         color={'#000000'}
         refresh
