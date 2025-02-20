@@ -48,6 +48,7 @@ async function getStudyStatus() {
     process.exit(1);
   }
 
+  console.log('participantList', participantList);
   // 统计当前在线的参会人数
   // leave_time 为 "-" 表示用户仍在会议中
   console.log('当前参会人数: ', participantList.filter((p) => p.leave_time === '-').length);
