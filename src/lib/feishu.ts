@@ -300,7 +300,7 @@ export default class Feishu {
       return data.data.participants;
     } else {
       console.log('获取参会人列表失败', data, startTime, endTime, meetingNo);
-      process.exit(1);
+      return undefined;
     }
   }
 }
