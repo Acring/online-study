@@ -185,10 +185,9 @@ export default class Feishu {
           meeting_status: meetingStatus,
         },
       });
-      console.log('data', response, startTime, endTime, meetingNo);
       return response.data?.participants;
     } catch (error) {
-      console.log('获取参会人列表失败', error, startTime, endTime, meetingNo);
+      console.log('获取参会人列表失败', error);
       return undefined;
     }
   }

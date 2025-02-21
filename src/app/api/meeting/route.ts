@@ -41,9 +41,13 @@ export async function GET() {
     });
   }
   // 获取参会者列表
+
+  const participantStartTime = dayjs.tz(meetingList[0].meeting_start_time, tz).unix(); // 会议开始时间;
+  const participantEndTime = dayjs().tz(tz).unix();
+
   const participantList = await feishuAPI.getParticipantList({
-    startTime: dayjs.utc(meetingList[0].meeting_start_time).tz(tz).unix(), // 会议开始时间
-    endTime: dayjs().tz(tz).unix(), // 当前时间
+    startTime: participantStartTime,
+    endTime: participantEndTime,
     meetingNo,
     meetingStatus: 1,
   });
