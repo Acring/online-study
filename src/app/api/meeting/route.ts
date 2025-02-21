@@ -88,5 +88,6 @@ export async function GET() {
     currentParticipants,
     participantDurations,
     totalParticipants: participantList.length,
+    now: dayjs().tz(tz).format('YYYY-MM-DD HH:mm:ss'),
   } as MeetingResponse);
 }

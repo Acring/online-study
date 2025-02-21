@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import { cn } from '@/lib/utils';
 import { MeetingResponse } from '@/types/api/meeting';
 
@@ -7,24 +5,7 @@ interface AvatarGroupProps {
   users: MeetingResponse['participantDurations'];
 }
 
-function generateGradient(): string {
-  const hue = Math.floor(Math.random() * 360);
-  return `linear-gradient(135deg, hsl(${hue}, 70%, 50%), hsl(${(hue + 40) % 360}, 70%, 50%))`;
-}
-
 export function AvatarGroup({ users }: AvatarGroupProps) {
-  // 为每个用户缓存颜色
-  const userGradients = useMemo(() => {
-    if (!users || users.length === 0) return {};
-    return users.reduce(
-      (acc, user) => {
-        acc[user.name] = generateGradient();
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  }, [users?.map((u) => u?.name).join(',')]); // 只在用户列表变化时重新生成
-
   if (!users || users.length === 0) {
     return null;
   }
@@ -45,14 +26,12 @@ export function AvatarGroup({ users }: AvatarGroupProps) {
         return (
           <div
             key={index}
-            className={`relative flex h-10 w-auto items-center justify-center rounded-full px-2 ring-2 ring-white ${
-              isOnline ? '' : 'bg-gray-300'
-            }`}
-            style={isOnline ? { background: userGradients[user.name] } : undefined}
+            className={cn(
+              'relative flex h-10 w-auto items-center justify-center rounded-full bg-white px-2 ring-gray-400',
+              isOnline ? 'ring-2' : 'opacity-60 ring-1'
+            )}
           >
-            <div className={cn('text-xl font-medium', isOnline ? 'text-white' : 'text-gray-600')}>
-              {user.name.slice(0, 7)}
-            </div>
+            <div className={cn('text-xl font-medium text-gray-800')}>{user.name.slice(0, 7)}</div>
           </div>
         );
       })}

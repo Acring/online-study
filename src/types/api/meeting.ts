@@ -14,7 +14,5 @@ export interface MeetingResponse {
   currentParticipants: number;
   participantDurations: ParticipantDuration[];
   totalParticipants: number;
-  onlineUsers: {
-    name: string;
-  }[];
+  now: string;
 }
