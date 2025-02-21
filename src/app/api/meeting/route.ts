@@ -76,6 +76,12 @@ export async function GET() {
       leaveTime: participant.leave_time,
     };
   });
+  console.log('data', {
+    meetingInfo: meetingList[0],
+    currentParticipants,
+    participantDurations,
+    totalParticipants: participantList.length,
+  });
 
   return NextResponse.json({
     meetingInfo: meetingList[0],
