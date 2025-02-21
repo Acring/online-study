@@ -15,6 +15,10 @@ export async function GET() {
   // 设置为北京时间
   const tz = 'Asia/Shanghai';
 
+  // 添加动态标记（重要）
+  const headers = new Headers();
+  headers.set('Cache-Control', 'no-store, max-age=0');
+
   // 开始时间设置为昨天凌晨（北京时间）
   const startTime = +(dayjs().tz(tz).subtract(1, 'day').startOf('day').valueOf() / 1000).toFixed(0);
   // 结束时间设置为今天晚上结束（北京时间）
@@ -83,11 +87,20 @@ export async function GET() {
     totalParticipants: participantList.length,
   });
 
-  return NextResponse.json({
-    meetingInfo: meetingList[0],
-    currentParticipants,
-    participantDurations,
-    totalParticipants: participantList.length,
-    now: dayjs().tz(tz).format('YYYY-MM-DD HH:mm:ss'),
-  } as MeetingResponse);
+  return new NextResponse(
+    JSON.stringify({
+      meetingInfo: meetingList[0],
+      currentParticipants,
+      participantDurations,
+      totalParticipants: participantList.length,
+      now: dayjs().tz(tz).format('YYYY-MM-DD HH:mm:ss'),
+    } as MeetingResponse),
+    {
+      headers,
+      status: 200,
+    }
+  );
 }
+
+// 强制动态渲染（重要）
+export const dynamic = 'force-dynamic';
