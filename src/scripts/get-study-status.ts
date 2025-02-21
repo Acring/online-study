@@ -33,6 +33,7 @@ async function getStudyStatus() {
   }
   // 获取第一个会议的会议号
   const meetingNo = meetingList[0].meeting_id;
+  console.log('meetingNo', meetingNo);
   if (!meetingNo) {
     console.log('获取会议号失败');
     process.exit(1);
@@ -48,7 +49,7 @@ async function getStudyStatus() {
     process.exit(1);
   }
 
-  console.log('participantList', participantList);
+  // console.log('participantList', participantList);
   // 统计当前在线的参会人数
   // leave_time 为 "-" 表示用户仍在会议中
   console.log('当前参会人数: ', participantList.filter((p) => p.leave_time === '-').length);
