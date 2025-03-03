@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import Cat from '@/components/Cat';
 import { AvatarGroup } from '@/components/ui/avatar-group';
 import { Clock } from '@/components/ui/clock';
 import { Particles } from '@/components/ui/particles';
@@ -75,6 +76,9 @@ export default function Home() {
           </div>
         </>
       )}
+      <div className="absolute bottom-4 right-[5%] z-20 flex h-[12.5vh] w-full items-center justify-center">
+        <Cat />
+      </div>
     </div>
   );
 }
